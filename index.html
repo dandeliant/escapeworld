@@ -110,22 +110,29 @@
         </div>
 
         <div class="sim-panel glass" id="sim-panel">
-          <div class="sim-title">🧭 TRYB SYMULACJI GPS <button class="btn-mini" id="btn-toggle-gps" title="Przełącz na prawdziwy GPS">GPS: SYM</button></div>
-          <div class="sim-dpad">
-            <button data-dir="up">▲</button>
-            <div class="dpad-mid">
-              <button data-dir="left">◀</button>
-              <button data-dir="stop" title="Stop">■</button>
-              <button data-dir="right">▶</button>
+          <div class="sim-title">
+            <span id="gps-status">🛰️ Szukam GPS…</span>
+            <button class="btn-mini" id="btn-toggle-gps" title="Przełącz GPS / symulację">przełącz</button>
+          </div>
+          <div id="sim-controls" class="hidden">
+            <div class="sim-dpad">
+              <button data-dir="up">▲</button>
+              <div class="dpad-mid">
+                <button data-dir="left">◀</button>
+                <button data-dir="stop" title="Stop">■</button>
+                <button data-dir="right">▶</button>
+              </div>
+              <button data-dir="down">▼</button>
             </div>
-            <button data-dir="down">▼</button>
+            <div class="sim-speed">
+              <label>Prędkość: <b id="sim-speed-label">5 km/h</b></label>
+              <input type="range" id="sim-speed" min="1" max="60" value="5">
+            </div>
+            <div class="sim-hint">Kliknij mapę, aby ruszyć w to miejsce pieszo</div>
           </div>
-          <div class="sim-speed">
-            <label>Prędkość: <b id="sim-speed-label">5 km/h</b></label>
-            <input type="range" id="sim-speed" min="1" max="60" value="5">
-          </div>
-          <div class="sim-hint">Kliknij mapę, aby ruszyć w to miejsce pieszo</div>
         </div>
+
+        <button class="recenter-fab following" id="btn-recenter" title="Wyśrodkuj na mnie i podążaj">🎯</button>
       </section>
 
       <!-- MISJE -->
@@ -283,6 +290,26 @@
   <button data-act="learn">📖 Dodaj do nauki</button>
   <button data-act="fav">⭐ Dodaj do ulubionych</button>
   <button data-act="grammar">🔎 Analiza gramatyczna (−150 🪙)</button>
+</div>
+
+<!-- ══════════ PRZENIESIENIE MISJI DO GRACZA ══════════ -->
+<div class="modal-backdrop hidden" id="relocate-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head">
+      <span class="modal-type">Sygnał GPS</span>
+      <h2>🌍 Jesteś daleko od obszaru gry</h2>
+    </div>
+    <div class="modal-body">
+      <p style="line-height:1.6">Wykryto Cię <b id="relocate-dist">?</b> od najbliższych misji.
+      Przenieść wszystkie punkty, tropy i artefakty <b>w Twoją okolicę</b>,
+      żeby zagrać tu i teraz — jak w prawdziwej grze terenowej?</p>
+      <p class="muted small" style="margin-top:8px">Układ punktów zostanie zachowany. Możesz to potem zmienić w panelu admina (Kampania → środek mapy).</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="btn-relocate-no">Zostaw, gdzie są</button>
+      <button class="btn btn-accent" id="btn-relocate-yes">📍 Przenieś misje do mnie</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════ TOASTY ══════════ -->

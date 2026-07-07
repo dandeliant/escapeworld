@@ -1,7 +1,7 @@
 /* ═══════════ EscapeWorld — Service Worker (PWA) ═══════════
    Precache powłoki aplikacji + cache dynamiczny dla kafelków mapy i czcionek.
    Podbij CACHE_VERSION przy każdej zmianie plików aplikacji. */
-const CACHE_VERSION = 'ew-v1';
+const CACHE_VERSION = 'ew-v2';
 const RUNTIME = 'ew-runtime-v1';
 
 const APP_SHELL = [

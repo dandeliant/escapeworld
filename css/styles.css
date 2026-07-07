@@ -253,6 +253,24 @@ input, select, textarea { font-family: var(--font); }
 .sim-speed input { width: 100%; accent-color: var(--cyan); }
 .sim-hint { margin-top: 6px; font-size: 0.72rem; color: var(--muted); text-align: center; }
 
+#gps-status { transition: color 0.3s; }
+#gps-status.on { color: var(--green); }
+#gps-status.off { color: var(--amber); }
+
+.recenter-fab {
+  position: absolute; bottom: 18px; left: 12px; z-index: 450;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--panel-solid); border: 1px solid var(--line-strong);
+  color: var(--cyan); font-size: 1.4rem;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+.recenter-fab.following {
+  background: rgba(0, 229, 255, 0.18);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+}
+.recenter-fab:active { transform: scale(0.92); }
+
 /* Markery */
 .ew-marker { background: none !important; border: none !important; }
 .marker-dot {

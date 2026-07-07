@@ -214,6 +214,35 @@ window.EW = window.EW || {};
     EW.toast(`${EW.LANGS[next].flag} Język nauki: <b>${EW.LANGS[next].name}</b>. Wszystkie zadania i pamiętniki są teraz w tym języku.`, 'good');
   }
 
+  /* ── status GPS w panelu na mapie ──
+     true = GPS aktywny, false = symulacja, null = łączenie */
+  function setGpsStatus(active, reason) {
+    const el = document.getElementById('gps-status');
+    const controls = document.getElementById('sim-controls');
+    if (!el) return;
+    if (active === true) {
+      el.textContent = '🛰️ GPS AKTYWNY';
+      el.className = 'on';
+      controls.classList.add('hidden');
+    } else if (active === false) {
+      el.textContent = '🧭 SYMULACJA' + (reason ? ` (${reason})` : '');
+      el.className = 'off';
+      controls.classList.remove('hidden');
+    } else {
+      el.textContent = '🛰️ Szukam GPS…';
+      el.className = '';
+    }
+  }
+
+  /* GPS znalazł gracza daleko od misji → zaproponuj przeniesienie kampanii */
+  function offerRelocation(distMeters) {
+    const el = document.getElementById('relocate-dist');
+    el.textContent = distMeters >= 1000
+      ? (distMeters / 1000).toFixed(1) + ' km'
+      : distMeters + ' m';
+    document.getElementById('relocate-modal').classList.remove('hidden');
+  }
+
   /* ── zdarzenia ── */
   function init() {
     // nawigacja
@@ -231,20 +260,31 @@ window.EW = window.EW || {};
       document.getElementById('sim-speed-label').textContent = slider.value + ' km/h';
     });
 
-    // przełącznik GPS
-    document.getElementById('btn-toggle-gps').addEventListener('click', function () {
-      if (EW.map.isSim()) {
-        if (EW.map.enableRealGps()) {
-          this.textContent = 'GPS: REAL';
-          document.getElementById('sim-panel').style.opacity = '0.5';
-          EW.toast('🛰️ Prawdziwy GPS włączony. Wyjdź w teren!', 'good');
-        }
+    // przełącznik GPS ⇄ symulacja
+    document.getElementById('btn-toggle-gps').addEventListener('click', () => {
+      if (EW.map.isGpsActive()) {
+        EW.map.stopGps();
+        setGpsStatus(false, 'tryb testowy');
+        EW.toast('🧭 Symulacja GPS włączona (tryb testowy).');
       } else {
-        EW.map.disableRealGps();
-        this.textContent = 'GPS: SYM';
-        document.getElementById('sim-panel').style.opacity = '1';
-        EW.toast('🧭 Powrót do symulacji GPS.');
+        EW.map.tryStartGps();
       }
+    });
+
+    // wyśrodkuj na graczu i podążaj (styl Pokemon GO)
+    document.getElementById('btn-recenter').addEventListener('click', () => {
+      EW.map.centerOnPlayer();
+    });
+
+    // przeniesienie kampanii w okolicę gracza
+    document.getElementById('btn-relocate-yes').addEventListener('click', () => {
+      const p = EW.state.player.pos;
+      EW.map.relocateCampaignTo(p.lat, p.lng);
+      document.getElementById('relocate-modal').classList.add('hidden');
+    });
+    document.getElementById('btn-relocate-no').addEventListener('click', () => {
+      document.getElementById('relocate-modal').classList.add('hidden');
+      EW.toast('ℹ️ Misje zostały na miejscu. Możesz je przenieść później w panelu admina.');
     });
 
     // język
@@ -275,5 +315,6 @@ window.EW = window.EW || {};
     init, updateHud, switchView,
     renderMissions, renderNotebook, renderInventory, renderShop,
     renderArtifacts, renderAchievements, renderStory, removeNote,
+    setGpsStatus, offerRelocation,
   };
 })();

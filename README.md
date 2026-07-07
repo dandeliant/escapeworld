@@ -5,6 +5,16 @@
 
 Terenowa gra językowo-przygodowa: mapa + GPS + nauka języków (EN/FR/DE/RU) + fabuła sci-fi/detektywistyczna + mechanika escape roomu. Frontend bez backendu — cały postęp i kampanie zapisują się lokalnie (localStorage), gotowe do późniejszego podłączenia serwera.
 
+## 🎮 Zagraj teraz
+
+**https://dandeliant.github.io/escapeworld/**
+
+Aplikacja jest **PWA** — na telefonie możesz ją zainstalować jak zwykłą apkę:
+- **Android (Chrome):** otwórz link → menu ⋮ → **„Dodaj do ekranu głównego" / „Zainstaluj aplikację"**
+- **iPhone (Safari):** otwórz link → przycisk Udostępnij → **„Dodaj do ekranu początkowego"**
+
+Po instalacji działa pełnoekranowo, ma własną ikonę, a powłoka aplikacji działa też offline (mapa wymaga internetu do pobierania nowych kafelków). Na telefonie przełącz **GPS: SYM → GPS: REAL** w panelu na mapie i wyjdź w teren!
+
 ## Uruchomienie
 
 Wymagany Node.js (dowolna aktualna wersja) — bez instalowania zależności:

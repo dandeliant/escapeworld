@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EscapeWorld — językowa gra terenowa</title>
+<meta name="description" content="Ucz się języków, ruszaj się i odkrywaj świat, zanim zrobią to obcy. Terenowa gra językowo-przygodowa z mapą i GPS.">
+<meta name="theme-color" content="#070b14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ══════════ EKRAN STARTOWY ══════════ -->
+<div id="screen-start" class="screen active">
+  <div class="start-bg"></div>
+  <div class="start-inner">
+    <div class="logo-block">
+      <div class="logo-glyph">◉</div>
+      <h1 class="logo">ESCAPE<span>WORLD</span></h1>
+      <p class="tagline">Językowa gra terenowa, w której każdy spacer jest misją.</p>
+      <p class="tagline-sub">Ucz się języków, ruszaj się i odkrywaj świat, zanim zrobią to obcy.</p>
+    </div>
+
+    <div class="start-card">
+      <h2 class="start-card-title">Wybierz język nauki</h2>
+      <div class="lang-grid" id="lang-grid">
+        <button class="lang-btn" data-lang="en"><span class="lang-flag">🇬🇧</span><span>Angielski</span></button>
+        <button class="lang-btn" data-lang="fr"><span class="lang-flag">🇫🇷</span><span>Francuski</span></button>
+        <button class="lang-btn" data-lang="de"><span class="lang-flag">🇩🇪</span><span>Niemiecki</span></button>
+        <button class="lang-btn" data-lang="ru"><span class="lang-flag">🇷🇺</span><span>Rosyjski</span></button>
+      </div>
+
+      <h2 class="start-card-title" style="margin-top:22px">Wybierz tryb</h2>
+      <div class="mode-grid">
+        <button class="mode-btn" id="btn-mode-player">
+          <span class="mode-icon">🕵️</span>
+          <span class="mode-name">Gracz</span>
+          <span class="mode-desc">Wyjdź w teren, odkrywaj tropy i łam kody obcych</span>
+        </button>
+        <button class="mode-btn" id="btn-mode-admin">
+          <span class="mode-icon">🛰️</span>
+          <span class="mode-name">Administrator</span>
+          <span class="mode-desc">Twórz świat gry: punkty, misje, pamiętniki, kampanie</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="start-story">
+      <p>Rok 2031. Obce istoty przejęły świat, kontrolując ludzi przez językowe kody.
+      Żywią się ludzką komunikacją. Jedyną bronią jest <b>Energia Lingwistyczna</b> —
+      każde poprawnie zrozumiane i wypowiedziane zdanie zasila Twój sprzęt.
+      Odnajdź pamiętniki ocalałych. Złam kod. Przetrwaj.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ WIDOK GRACZA ══════════ -->
+<div id="screen-player" class="screen">
+  <div id="admin-preview-bar" class="admin-preview-bar hidden">
+    <span>🛰️ PODGLĄD GRACZA — tryb testowy admina</span>
+    <button id="btn-back-to-admin" class="btn btn-sm">← Wróć do panelu admina</button>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo" id="btn-home">◉ EW</span>
+      <span class="chapter-badge" id="hud-chapter">Rozdział 1</span>
+    </div>
+    <div class="hud">
+      <div class="hud-item" title="Coins (Energia Lingwistyczna w postaci materialnej)"><span class="hud-ico">🪙</span><span id="hud-coins">0</span></div>
+      <div class="hud-item" title="Lingua Energy"><span class="hud-ico">⚡</span><span id="hud-energy">0</span></div>
+      <div class="hud-item" title="Zdrowie"><span class="hud-ico">❤️</span><span id="hud-hp">100</span></div>
+      <div class="hud-item" title="Poziom"><span class="hud-ico">⭐</span><span id="hud-level">1</span>
+        <div class="xp-bar"><div class="xp-fill" id="hud-xp"></div></div>
+      </div>
+      <div class="hud-item" title="Przebyty dystans"><span class="hud-ico">👣</span><span id="hud-dist">0 m</span></div>
+      <div class="hud-item" title="Aktualna prędkość"><span class="hud-ico">🚶</span><span id="hud-speed">0 km/h</span></div>
+      <div class="hud-item hud-lang" id="hud-lang" title="Język nauki — kliknij, aby zmienić">🇬🇧 EN</div>
+    </div>
+  </header>
+
+  <div class="player-layout">
+    <nav class="sidenav" id="player-nav">
+      <button class="nav-btn active" data-view="map"><span>🗺️</span>Mapa</button>
+      <button class="nav-btn" data-view="missions"><span>📡</span>Misje</button>
+      <button class="nav-btn" data-view="notebook"><span>📖</span>Notatnik</button>
+      <button class="nav-btn" data-view="inventory"><span>🎒</span>Ekwipunek</button>
+      <button class="nav-btn" data-view="shop"><span>🛒</span>Sklep</button>
+      <button class="nav-btn" data-view="artifacts"><span>💠</span>Artefakty</button>
+      <button class="nav-btn" data-view="achievements"><span>🏆</span>Osiągnięcia</button>
+      <button class="nav-btn" data-view="story"><span>📜</span>Historia</button>
+    </nav>
+
+    <main class="player-main">
+      <!-- MAPA -->
+      <section class="pview active" id="pview-map">
+        <div id="map"></div>
+
+        <div class="map-overlay-top">
+          <div class="nearest-hint glass" id="nearest-hint">Skanowanie terenu…</div>
+        </div>
+
+        <div class="sim-panel glass" id="sim-panel">
+          <div class="sim-title">🧭 TRYB SYMULACJI GPS <button class="btn-mini" id="btn-toggle-gps" title="Przełącz na prawdziwy GPS">GPS: SYM</button></div>
+          <div class="sim-dpad">
+            <button data-dir="up">▲</button>
+            <div class="dpad-mid">
+              <button data-dir="left">◀</button>
+              <button data-dir="stop" title="Stop">■</button>
+              <button data-dir="right">▶</button>
+            </div>
+            <button data-dir="down">▼</button>
+          </div>
+          <div class="sim-speed">
+            <label>Prędkość: <b id="sim-speed-label">5 km/h</b></label>
+            <input type="range" id="sim-speed" min="1" max="60" value="5">
+          </div>
+          <div class="sim-hint">Kliknij mapę, aby ruszyć w to miejsce pieszo</div>
+        </div>
+      </section>
+
+      <!-- MISJE -->
+      <section class="pview" id="pview-missions">
+        <h2 class="view-title">📡 Misje</h2>
+        <div id="missions-list"></div>
+      </section>
+
+      <!-- NOTATNIK -->
+      <section class="pview" id="pview-notebook">
+        <h2 class="view-title">📖 Notatnik językowy</h2>
+        <div class="notebook-toolbar">
+          <button class="btn btn-accent" id="btn-review">🎯 Rozpocznij powtórkę</button>
+          <span class="muted" id="notebook-due"></span>
+        </div>
+        <div id="notebook-list"></div>
+      </section>
+
+      <!-- EKWIPUNEK -->
+      <section class="pview" id="pview-inventory">
+        <h2 class="view-title">🎒 Ekwipunek</h2>
+        <div class="card-grid" id="inventory-list"></div>
+      </section>
+
+      <!-- SKLEP -->
+      <section class="pview" id="pview-shop">
+        <h2 class="view-title">🛒 Sklep — zasilany Lingua Energy</h2>
+        <div id="shop-list"></div>
+      </section>
+
+      <!-- ARTEFAKTY -->
+      <section class="pview" id="pview-artifacts">
+        <h2 class="view-title">💠 Artefakty</h2>
+        <div class="card-grid" id="artifacts-list"></div>
+      </section>
+
+      <!-- OSIĄGNIĘCIA -->
+      <section class="pview" id="pview-achievements">
+        <h2 class="view-title">🏆 Osiągnięcia</h2>
+        <div class="card-grid" id="achievements-list"></div>
+      </section>
+
+      <!-- HISTORIA -->
+      <section class="pview" id="pview-story">
+        <h2 class="view-title">📜 Odkryta historia</h2>
+        <div id="story-list"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ WIDOK ADMINA ══════════ -->
+<div id="screen-admin" class="screen">
+  <header class="topbar topbar-admin">
+    <div class="topbar-left">
+      <span class="topbar-logo" id="btn-home-admin">◉ EW</span>
+      <span class="chapter-badge admin-badge">PANEL ADMINISTRATORA</span>
+    </div>
+    <div class="hud">
+      <button class="btn btn-accent" id="btn-admin-preview">👁️ Podgląd gracza</button>
+    </div>
+  </header>
+
+  <div class="player-layout">
+    <nav class="sidenav">
+      <button class="nav-btn active" data-aview="map"><span>🗺️</span>Edytor mapy</button>
+      <button class="nav-btn" data-aview="missions"><span>🧩</span>Kreator misji</button>
+      <button class="nav-btn" data-aview="campaign"><span>🌍</span>Kampania</button>
+      <button class="nav-btn" data-aview="data"><span>💾</span>Dane</button>
+      <button class="nav-btn" data-aview="test"><span>🧪</span>Tryb testowy</button>
+    </nav>
+
+    <main class="player-main">
+      <!-- EDYTOR MAPY -->
+      <section class="aview active" id="aview-map">
+        <div id="admin-map"></div>
+        <div class="admin-map-side glass">
+          <h3>🗺️ Edytor mapy</h3>
+          <p class="muted small">Kliknij mapę, aby dodać punkt. Przeciągaj markery, aby zmieniać pozycję. Kliknij marker, aby edytować.</p>
+          <label class="field"><span>Typ nowego punktu</span>
+            <select id="admin-new-type"></select>
+          </label>
+          <div id="admin-points-list" class="admin-points-list"></div>
+        </div>
+      </section>
+
+      <!-- KREATOR MISJI -->
+      <section class="aview" id="aview-missions">
+        <div class="editor-layout">
+          <div class="editor-list glass">
+            <h3>🧩 Punkty i misje</h3>
+            <button class="btn btn-accent btn-block" id="btn-new-point">➕ Nowy punkt (środek mapy)</button>
+            <div id="editor-points-list"></div>
+          </div>
+          <div class="editor-form glass" id="editor-form">
+            <p class="muted">Wybierz punkt z listy lub utwórz nowy, aby edytować misję.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- KAMPANIA -->
+      <section class="aview" id="aview-campaign">
+        <h2 class="view-title">🌍 Kampania i rozdziały</h2>
+        <div id="campaign-editor"></div>
+      </section>
+
+      <!-- DANE -->
+      <section class="aview" id="aview-data">
+        <h2 class="view-title">💾 Dane kampanii</h2>
+        <div class="data-actions glass">
+          <button class="btn btn-accent" id="btn-export">⬇️ Eksportuj kampanię (JSON)</button>
+          <button class="btn" id="btn-import">⬆️ Importuj kampanię (JSON)</button>
+          <input type="file" id="import-file" accept=".json" hidden>
+          <button class="btn btn-danger" id="btn-reset-campaign">♻️ Przywróć domyślną kampanię</button>
+          <button class="btn btn-danger" id="btn-reset-progress">🗑️ Resetuj postęp gracza</button>
+        </div>
+        <pre class="json-preview glass" id="json-preview"></pre>
+      </section>
+
+      <!-- TRYB TESTOWY -->
+      <section class="aview" id="aview-test">
+        <h2 class="view-title">🧪 Tryb testowy</h2>
+        <div class="data-actions glass">
+          <button class="btn" id="btn-test-coins">+1000 coins</button>
+          <button class="btn" id="btn-test-energy">+500 Lingua Energy</button>
+          <button class="btn" id="btn-test-heal">Ulecz gracza</button>
+          <button class="btn" id="btn-test-unlock">Odblokuj wszystkie punkty</button>
+          <button class="btn btn-danger" id="btn-test-reset">Resetuj postęp testowy</button>
+        </div>
+        <h3 style="margin:16px 0 8px">📋 Log zdarzeń</h3>
+        <div class="event-log glass" id="event-log"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ MODAL MISJI ══════════ -->
+<div class="modal-backdrop hidden" id="mission-modal">
+  <div class="modal mission-modal">
+    <div class="modal-head">
+      <span class="modal-type" id="mm-type"></span>
+      <h2 id="mm-title"></h2>
+      <button class="modal-close" id="mm-close">✕</button>
+    </div>
+    <div class="modal-body" id="mm-body"></div>
+    <div class="modal-foot" id="mm-foot"></div>
+  </div>
+</div>
+
+<!-- ══════════ MENU KONTEKSTOWE ZDANIA ══════════ -->
+<div class="sentence-menu hidden" id="sentence-menu">
+  <button data-act="play">▶ Odtwórz wymowę</button>
+  <button data-act="word">🔊 Odtwórz słowo…</button>
+  <button data-act="translate">🌍 Przetłumacz (−100 🪙)</button>
+  <button data-act="learn">📖 Dodaj do nauki</button>
+  <button data-act="fav">⭐ Dodaj do ulubionych</button>
+  <button data-act="grammar">🔎 Analiza gramatyczna (−150 🪙)</button>
+</div>
+
+<!-- ══════════ TOASTY ══════════ -->
+<div class="toasts" id="toasts"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/map.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui-player.js"></script>
+<script src="js/ui-admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
